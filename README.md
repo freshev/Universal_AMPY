@@ -7,7 +7,6 @@ This warehouse is the `RT-Thread MicroPython IDE` serial port command line tool 
 Enter the following command on the command line to install the software packages that the tool depends on:
 
 ```python
-python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial python-dotenv pyinstaller
 make.bat
 ```
 
@@ -101,34 +100,11 @@ A new file needs to be specified for each development board, otherwise the files
 
 Sending b'\xe8' characters to the serial port will turn off the echo function, and sending b'\xe9' to the serial port will turn the echo function back on. This function can be used to turn off echo before pressing `CTRL + E` to enter paste mode, so that the input content is not displayed on the terminal.
 
-## 3. Repackage the cli tool
+## 3. Contribution 
+Adopt AMPY cli.exe to use with A9/A9G Ai-thinker module.
 
-cli runs on different systems and may need to be repackaged. If the tool cannot run on your system, you can try to repackage it with the following command, and then replace the cli tool in the plug-in. The general path of the plug-in backend is as follows:
-
-```
-.vscode\extensions\rt-thread.rt-thread-micropython-1.x.x\ampy
-```
-
-### 3.1 Package cli on windows system
-
-`pyinstaller.exe -F .\cli.py -p ampy`
-
-### 3.2 Package cli on linux (including Linux-like operating systems such as Deepin Mac)
-
-`pyinstaller -F cli.py -p ampy`
-
-### 3.3 Add the current conversation to the dialout user group under linux
-
-Execute the following command. When using your_username for serial port operations, you no longer need to enter sudo to frequently obtain permissions.
-
-`sudo usermod -aG dialout your_username`
-
-
-## 4. Contribution 
-Adopt AMPY cli to use with A9/A9G Ai-thinker module
-
-## 5. Use with VS Code
+## 4. Use with VS Code
 * install VS Code
 * install rt-thread-micropython plugin
-* Make and copy cli.exe to .../rt-thread.rt-thread-micropython-XXX/ampy folder (make.bat)
+* run `make.bat`
 
