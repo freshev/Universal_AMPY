@@ -1,0 +1,40 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/cli.py",
+            "purpose": ["debug-test"],
+            "console": "integratedTerminal",            
+            // "args": [
+            //     "-p",
+            //     "query",
+            //     "portscan"
+            // ],
+            // "args": [
+            //     "-p",
+            //     "COM14",
+            //     "ls"
+            // ],
+            "args": [
+                "-p",
+                "COM1",
+                "sync"
+            ],
+            // "args": [
+            //     "-p", "COM2", "sync", 
+            //     "-l",
+            //     "c:/Users/USER/asque/asque/firmware/ESP8266",
+            //     "-i",
+            //     "c:/Users/USER/.vscode/extensions/rt-thread.rt-thread-micropython-1.0.11/file_infoCOM2"
+            // ],
+            "justMyCode": false
+        }
+    ]
+}
+          
