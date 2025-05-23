@@ -464,10 +464,11 @@ def reset(mode):
         pass
 
 
-def repl_serial_to_stdout(serial):
+def repl_serial_to_stdout(s):
 
     global _system
     global serial_out_put_count
+    global serial_global
 
     def hexsend(string_data=''):
         hex_data = string_data.decode("hex")
@@ -476,7 +477,25 @@ def repl_serial_to_stdout(serial):
     try:
         data = b''
         while serial_reader_running:
-            count = serial.inWaiting()
+            try:
+                count = s.inWaiting()
+            except serial.serialutil.SerialException:
+                # try to reconnect to PyBoard
+                try:
+                    _board.close()
+                except Exception:
+                    pass
+                try:
+                    _board.open(10)
+                    s = _board.serial
+                    serial_global = s
+                    serial_global
+                    # count = s.inWaiting()
+                    serial_global.write(b'\r')
+                except PyboardError:
+                    return
+                except serial.serialutil.SerialException:
+                    return
 
             if count == 0:
                 time.sleep(0.01)
@@ -484,7 +503,7 @@ def repl_serial_to_stdout(serial):
 
             if count > 0:
                 try:
-                    data += serial.read(count)
+                    data += s.read(count)
 
                     if len(data) < 20:
                         try:
@@ -500,7 +519,7 @@ def repl_serial_to_stdout(serial):
                                 sys.stdout.buffer.write(data.replace(b"\r", b""))
                             sys.stdout.buffer.flush()
                     else:
-                        serial.write(hexsend(data))
+                        s.write(hexsend(data))
 
                     data = b''
                     serial_out_put_count += 1
@@ -520,8 +539,8 @@ def repl_serial_to_stdout(serial):
                     return
 
     except KeyboardInterrupt:
-        if serial != None:
-            serial.close()
+        if s != None:
+            s.close()
 
 @cli.command()
 @click.option(
@@ -540,6 +559,7 @@ def repl(query = None):
     global serial_reader_running
     global serial_out_put_enable
     global serial_out_put_count
+    global serial_global
 
     serial_out_put_count = 1
 
@@ -550,15 +570,15 @@ def repl(query = None):
 
     _board.read_until_hit()
 
-    serial = _board.serial
+    serial_global = _board.serial
 
-    repl_thread = threading.Thread(target = repl_serial_to_stdout, args=(serial,), name='REPL_serial_to_stdout')
+    repl_thread = threading.Thread(target = repl_serial_to_stdout, args=(serial_global,), name='REPL_serial_to_stdout')
     repl_thread.daemon = True
     repl_thread.start()
 
     try:
         # Wake up the prompt
-        serial.write(b'\r')
+        serial_global.write(b'\r')
 
         count = 0
 
@@ -595,7 +615,7 @@ def repl(query = None):
                 # space which should cause the wipy to echo back a
                 # space which will wakeup our reader thread so it will
                 # notice the quit.
-                serial.write(b' ')
+                serial_global.write(b' ')
                 # Give the reader thread a chance to detect the quit
                 # then we don't have to call getch() above again which
                 # means we'd need to wait for another character.
@@ -608,9 +628,9 @@ def repl(query = None):
                 return
 
             if char == b'\n':
-                serial.write(b'\r')
+                serial_global.write(b'\r')
             else:
-                serial.write(char)
+                serial_global.write(char)
     except DeviceError as err:
         # The device is no longer present.
         self.print('')

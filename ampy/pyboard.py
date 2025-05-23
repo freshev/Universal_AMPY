@@ -121,40 +121,45 @@ class TelnetToSerial:
 class Pyboard:
     def __init__(self, device, baudrate=115200, user='micro', password='python', wait=0, rawdelay=0):
         global _rawdelay
+        self.device = device
+        self.baudrate = baudrate
         _rawdelay = rawdelay
         if device and device[0].isdigit() and device[-1].isdigit() and device.count('.') == 3:
             # device looks like an IP address
             self.serial = TelnetToSerial(device, user, password, read_timeout=10)
         else:
-            import serial
-            delayed = False
-            for attempt in range(wait + 1):
-                try:
-                    #self.serial = serial.Serial(device, baudrate=baudrate, interCharTimeout=1, timeout=1)
-                    self.serial = serial.Serial();
-                    self.serial.port = device
-                    self.serial.baudrate = baudrate
-                    self.serial.interCharTimeout = 1
-                    self.serial.timeout = 1
-                    self.serial.dtr = False
-                    self.serial.rts = False                    
-                    self.serial.open()
-                    break
-                except (OSError, IOError): # Py2 and Py3 have different errors
-                    if wait == 0:
-                        continue
-                    if attempt == 0:
-                        sys.stdout.write('Waiting {} seconds for pyboard '.format(wait))
-                        delayed = True
-                time.sleep(1)
-                sys.stdout.write('.')
-                sys.stdout.flush()
-            else:
-                if delayed:
-                    print('')
-                raise PyboardError('failed to access ' + device)
+           self.open(wait)
+
+    def open(self, wait=0):
+        import serial
+        delayed = False
+        for attempt in range(wait + 1):
+            try:
+                #self.serial = serial.Serial(device, baudrate=baudrate, interCharTimeout=1, timeout=1)
+                self.serial = serial.Serial();
+                self.serial.port = self.device
+                self.serial.baudrate = self.baudrate
+                self.serial.interCharTimeout = 1
+                self.serial.timeout = 1
+                self.serial.dtr = False
+                self.serial.rts = False                    
+                self.serial.open()
+                break
+            except (OSError, IOError): # Py2 and Py3 have different errors
+                if wait == 0:
+                    continue
+                if attempt == 0:
+                    sys.stdout.write('Waiting {} seconds for pyboard '.format(wait))
+                    delayed = True
+            time.sleep(1)
+            sys.stdout.write('.')
+            sys.stdout.flush()
+        else:
             if delayed:
                 print('')
+            raise PyboardError('failed to access ' + self.device)
+        if delayed:
+            print('')
 
     def close(self):
         self.serial.close()
