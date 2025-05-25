@@ -149,7 +149,7 @@ class Pyboard:
                 if wait == 0:
                     continue
                 if attempt == 0:
-                    sys.stdout.write('Waiting {} seconds for pyboard '.format(wait))
+                    sys.stdout.write('\nWaiting {} seconds for pyboard '.format(wait))
                     delayed = True
             time.sleep(1)
             sys.stdout.write('.')

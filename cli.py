@@ -33,6 +33,7 @@ import serial
 import serial.serialutil
 import serial.tools.list_ports
 import threading
+import _thread
 import click
 import dotenv
 import sys
@@ -41,6 +42,7 @@ import hashlib
 import json
 import ampy.files as files
 import ampy.pyboard as pyboard
+from ampy.pyboard import PyboardError
 import gc
 
 from ampy.getch import getch
@@ -486,15 +488,22 @@ def repl_serial_to_stdout(s):
                 except Exception:
                     pass
                 try:
+                    serial_global = None
                     _board.open(10)
                     s = _board.serial
-                    serial_global = s
-                    serial_global
-                    # count = s.inWaiting()
-                    serial_global.write(b'\r')
-                except PyboardError:
+                    s.write(b'\r')
+                    serial_global = s                    
+                except PyboardError as e:
+                    sys.stdout.write(str(e) + '\n')
+                    sys.stdout.flush()
+                    _thread.interrupt_main()
+                    pass
                     return
                 except serial.serialutil.SerialException:
+                    sys.stdout.write(str(e) + 'n')
+                    sys.stdout.flush()
+                    _thread.interrupt_main()
+                    pass
                     return
 
             if count == 0:
@@ -541,6 +550,7 @@ def repl_serial_to_stdout(s):
     except KeyboardInterrupt:
         if s != None:
             s.close()
+        pass
 
 @cli.command()
 @click.option(
@@ -584,6 +594,7 @@ def repl(query = None):
 
         while True:
             char = getch()
+            if serial_global == None: return
 
             if char == b'\x16':
                 char = b'\x03'
@@ -631,7 +642,7 @@ def repl(query = None):
                 serial_global.write(b'\r')
             else:
                 serial_global.write(char)
-    except DeviceError as err:
+    except Exception as err:
         # The device is no longer present.
         self.print('')
         self.stdout.flush()

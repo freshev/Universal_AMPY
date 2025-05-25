@@ -20,6 +20,8 @@ build/
 
 # dotenv
 .env
+a.bat
+b.bat
 
 # virtualenv
 .virt/

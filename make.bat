@@ -1,5 +1,6 @@
 python -m venv .virt
 call .virt\Scripts\activate.bat
-pip install pyserial click python-dotenv pyinstaller
+pip install pyserial click python-dotenv pyinstaller 
+pip uninstall windows-curses
 pyinstaller.exe --hidden-import serial --hidden-import click --hidden-import python-dotenv -F .\cli.py -p ampy
 copy .\dist\cli.exe %USERPROFILE%\.vscode\extensions\rt-thread.rt-thread-micropython-1.0.11\ampy 
